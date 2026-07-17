@@ -118,6 +118,17 @@ balance on every run.
 
 ## Notes and rough edges
 
+- **STAS/DSTAS need the wallet on *local* storage to be visible.** Known
+  bsv-desktop limitation, confirmed on mainnet: the wallet's STAS/DSTAS satellite
+  tables are local-SQLite only, while remote ("cloud") storage keeps `outputs`
+  elsewhere. Registration then can't resolve the output id, silently skips the
+  satellite link, and **still reports success** — so the token is on-chain,
+  in the right basket and spendable, but the Assets page never shows it. BSV-21
+  is unaffected (it renders straight from the basket). If your STAS/DSTAS mints
+  don't appear, check your storage mode before suspecting this tool.
+- **Registration is retried** (4 attempts). The wallet builds a chained BEEF by
+  walking the mint's ancestry for merkle proofs, and moments after broadcast that
+  can transiently produce a BEEF it then rejects. One attempt is not enough.
 - **STAS**: `stas-js` signs at 0.05 sat/b, so a STAS mint can take a while to
   confirm. It is visible and usable in the wallet regardless — registration
   doesn't wait for a confirmation.

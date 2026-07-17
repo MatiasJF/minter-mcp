@@ -396,15 +396,38 @@ async function mintFor(
  * This single call is what turns "wait ~1 confirmation, then hit Refresh" into
  * seconds. Non-fatal: the tokens are already on-chain and WOC discovery will
  * find them eventually, so a registration failure is reported, not thrown.
+ *
+ * Retried, because the first attempt races the chain. The wallet assembles a
+ * chained BEEF by walking the mint's ancestry until every leaf has a merkle
+ * proof; moments after broadcast that walk can transiently produce a BEEF the
+ * wallet then rejects ("must be valid AtomicBEEF"). Observed live on a BSV-21
+ * mint whose funding ancestry was still settling: attempt 1 failed, a later
+ * attempt succeeded with no other change. Reporting failure on one attempt made
+ * a working mint look broken.
  */
-async function deliver(protocol: Protocol, txid: string): Promise<Record<string, unknown>> {
-  try {
-    const r = await wallet.registerByTxid(protocol, txid)
-    // Spread first: `r.registered` is a count, and the caller wants a boolean.
-    return { ...r, registeredCount: r.registered ?? 0, registered: (r.registered ?? 0) > 0 }
-  } catch (e) {
-    return { registered: false, error: (e as Error).message }
+async function deliver(
+  protocol: Protocol,
+  txid: string,
+  attempts = 4
+): Promise<Record<string, unknown>> {
+  const tried: string[] = []
+  for (let i = 0; i < attempts; i++) {
+    if (i > 0) await sleep(3000 * i) // 3s, 6s, 9s — the race settles in seconds
+    try {
+      const r = await wallet.registerByTxid(protocol, txid)
+      const count = r.registered ?? 0
+      if (count > 0) {
+        // Spread first: `r.registered` is a count, the caller wants a boolean.
+        return { ...r, registeredCount: count, registered: true, attempts: i + 1 }
+      }
+      tried.push(
+        `attempt ${i + 1}: ${r.error ?? r.outputs?.find((o) => o.matched)?.reason ?? 'registered 0 outputs'}`
+      )
+    } catch (e) {
+      tried.push(`attempt ${i + 1}: ${(e as Error).message}`)
+    }
   }
+  return { registered: false, attempts, failures: tried }
 }
 
 /**

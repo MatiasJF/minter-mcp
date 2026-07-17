@@ -27,8 +27,16 @@ export interface ReceiveAddress {
 
 export interface RegisterResult {
   txid: string
+  /** Count of outputs registered, not a boolean — 0 means nothing landed. */
   registered: number
-  outputs?: Array<{ vout: number; matched: boolean; protocol?: string }>
+  outputs?: Array<{
+    vout: number
+    matched: boolean
+    protocol?: string
+    ok?: boolean
+    /** Present when a matched output failed to register. */
+    reason?: string
+  }>
   error?: string
 }
 
