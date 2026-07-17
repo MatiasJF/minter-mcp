@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.log
+
+# Secrets — never commit.
+# The minter's key lives outside the repo by design (~/.stas-minter/wallet.json),
+# but belt and braces in case someone points MINTER_HOME here.
+.env
+.env.local
+*.wif
+*.mnemonic
+wallet.json
+.stas-minter/
+
+.DS_Store

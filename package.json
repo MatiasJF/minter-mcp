@@ -1,0 +1,61 @@
+{
+  "name": "minter-mcp",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "MCP server that mints STAS, DSTAS and BSV-21 tokens straight into a running BSV Desktop wallet — funded from your own wallet, visible in Assets within seconds. For testing token flows without hand-rolling a mint.",
+  "main": "dist/index.js",
+  "bin": {
+    "minter-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "engines",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "bsv",
+    "stas",
+    "dstas",
+    "bsv-21",
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "mint",
+    "tokens",
+    "blockchain"
+  ],
+  "author": {
+    "name": "Matias Jackson"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MatiasJF/minter-mcp.git"
+  },
+  "homepage": "https://github.com/MatiasJF/minter-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/MatiasJF/minter-mcp/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.11.0",
+    "bsv": "^1.5.6",
+    "dxs-bsv-token-sdk": "^1.0.4",
+    "stas-js": "^3.0.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}
